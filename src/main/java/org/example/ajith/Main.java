@@ -6,6 +6,7 @@ import org.bouncycastle.util.io.pem.PemWriter;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.security.*;
 
 public class Main {
@@ -21,6 +22,9 @@ public class Main {
         PublicKey pubkey = keyPair.getPublic();
 
         saveToPEM(pvtkey, pubkey);
+
+        String pemstr = saveAsPEMToBuffer(pvtkey, pubkey);
+        System.out.println(pemstr);
 
 
     }
@@ -76,4 +80,35 @@ public class Main {
 
 
     }
+    public static String saveAsPEMToBuffer(PrivateKey privateKey, PublicKey publicKey) {
+
+        PemWriter pemWriter = null;
+        PemObject pemObject = null;
+        StringWriter sw = new StringWriter();
+
+        pemObject = new PemObject("PRIVATE KEY", privateKey.getEncoded());
+        try {
+            pemWriter = new PemWriter(sw);
+            pemWriter.writeObject(pemObject);
+
+        } catch (IOException e) {
+            System.out.println("Error saving private key: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            if (pemWriter != null) {
+                try {
+                    pemWriter.close();
+                } catch (IOException e) {
+                    System.out.println("Error saving private key file: " + e.getMessage());
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+
+        return sw.toString();
+    }
+
 }
